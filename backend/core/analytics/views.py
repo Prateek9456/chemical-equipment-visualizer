@@ -10,30 +10,6 @@ from analytics.models import Dataset
 from analytics.serializers import DatasetSerializer
 
 
-def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Normalize column names to backend-standard format.
-    Supports multiple CSV schemas.
-    """
-    df = df.rename(columns={
-        "Type": "equipment_type",
-        "Equipment Type": "equipment_type",
-        "equipment_type": "equipment_type",
-
-        "Flowrate": "flow_rate",
-        "Flow Rate": "flow_rate",
-        "flow_rate": "flow_rate",
-
-        "Pressure": "pressure",
-        "pressure": "pressure",
-
-        "Temperature": "temperature",
-        "temperature": "temperature",
-    })
-
-    return df
-
-
 @api_view(["POST"])
 def upload_csv(request):
     file = request.FILES.get("file")
@@ -41,30 +17,15 @@ def upload_csv(request):
         return Response({"error": "No file provided"}, status=400)
 
     df = pd.read_csv(file)
-    df = normalize_columns(df)
 
-    required_cols = {
-        "equipment_type",
-        "flow_rate",
-        "pressure",
-        "temperature",
-    }
-
-    if not required_cols.issubset(df.columns):
-        return Response(
-            {
-                "error": "Invalid CSV format",
-                "expected_columns": list(required_cols),
-                "received_columns": list(df.columns),
-            },
-            status=400,
-        )
+    # Normalize column names (IMPORTANT for robustness)
+    df.columns = [c.strip().lower() for c in df.columns]
 
     total_equipment = len(df)
-    average_flowrate = round(df["flow_rate"].mean(), 2)
+    average_flowrate = round(df["flowrate"].mean(), 2)
     average_pressure = round(df["pressure"].mean(), 2)
     average_temperature = round(df["temperature"].mean(), 2)
-    type_distribution = df["equipment_type"].value_counts().to_dict()
+    type_distribution = df["type"].value_counts().to_dict()
 
     summary = {
         "total_equipment": total_equipment,
@@ -76,12 +37,18 @@ def upload_csv(request):
 
     Dataset.objects.create(
         name=file.name,
-        summary=summary,
+        summary=summary
     )
 
+    # ✅ SAFE cleanup: keep only last 5
     excess = Dataset.objects.count() - 5
     if excess > 0:
-        Dataset.objects.all().order_by("uploaded_at")[:excess].delete()
+        ids_to_delete = (
+            Dataset.objects
+            .order_by("uploaded_at")
+            .values_list("id", flat=True)[:excess]
+        )
+        Dataset.objects.filter(id__in=list(ids_to_delete)).delete()
 
     return Response(summary)
 
@@ -119,16 +86,15 @@ def generate_report(request):
 
     y -= 20
     p.setFont("Helvetica", 10)
+    s = latest.summary
 
-    summary = latest.summary
-
-    p.drawString(60, y, f"Total Equipment: {summary['total_equipment']}")
+    p.drawString(60, y, f"Total Equipment: {s['total_equipment']}")
     y -= 15
-    p.drawString(60, y, f"Average Flow Rate: {summary['average_flowrate']}")
+    p.drawString(60, y, f"Average Flowrate: {s['average_flowrate']}")
     y -= 15
-    p.drawString(60, y, f"Average Pressure: {summary['average_pressure']}")
+    p.drawString(60, y, f"Average Pressure: {s['average_pressure']}")
     y -= 15
-    p.drawString(60, y, f"Average Temperature: {summary['average_temperature']}")
+    p.drawString(60, y, f"Average Temperature: {s['average_temperature']}")
 
     y -= 30
     p.setFont("Helvetica-Bold", 12)
@@ -136,11 +102,10 @@ def generate_report(request):
 
     y -= 20
     p.setFont("Helvetica", 10)
-    for eq, count in summary["type_distribution"].items():
-        p.drawString(60, y, f"{eq}: {count}")
+    for k, v in s["type_distribution"].items():
+        p.drawString(60, y, f"{k}: {v}")
         y -= 15
 
     p.showPage()
     p.save()
-
     return response
