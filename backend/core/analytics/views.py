@@ -2,12 +2,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils.timezone import now
+
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+
 import pandas as pd
 
-from .models import Dataset
-from .serializers import DatasetSerializer
+from analytics.models import Dataset
+from analytics.serializers import DatasetSerializer
 
 
 @api_view(["POST"])
@@ -37,6 +39,7 @@ def upload_csv(request):
         summary=summary
     )
 
+    # Keep only last 5 uploads
     excess = Dataset.objects.count() - 5
     if excess > 0:
         Dataset.objects.all().order_by("uploaded_at")[:excess].delete()
@@ -62,24 +65,30 @@ def generate_report(request):
 
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4
-
     y = height - 50
 
+    # Title
     p.setFont("Helvetica-Bold", 16)
     p.drawString(50, y, "Chemical Equipment Analytics Report")
 
+    # Timestamp
     y -= 30
     p.setFont("Helvetica", 10)
-    p.drawString(50, y, f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}")
+    p.drawString(
+        50,
+        y,
+        f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
 
+    # Summary metrics
     y -= 40
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Summary Metrics")
 
     y -= 20
     p.setFont("Helvetica", 10)
-
     summary = latest.summary
+
     p.drawString(60, y, f"Total Equipment: {summary['total_equipment']}")
     y -= 15
     p.drawString(60, y, f"Average Flow Rate: {summary['average_flowrate']}")
@@ -88,14 +97,15 @@ def generate_report(request):
     y -= 15
     p.drawString(60, y, f"Average Temperature: {summary['average_temperature']}")
 
+    # Equipment distribution
     y -= 30
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Equipment Type Distribution")
 
     y -= 20
     p.setFont("Helvetica", 10)
-    for k, v in summary["type_distribution"].items():
-        p.drawString(60, y, f"{k}: {v}")
+    for equipment, count in summary["type_distribution"].items():
+        p.drawString(60, y, f"{equipment}: {count}")
         y -= 15
 
     p.showPage()
