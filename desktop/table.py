@@ -2,8 +2,15 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout
 
 
 def render_table(container, data):
+    # Ensure layout exists
+    if container.layout() is None:
+        container.setLayout(QVBoxLayout())
+
+    # Clear old table
     for i in reversed(range(container.layout().count())):
-        container.layout().itemAt(i).widget().setParent(None)
+        widget = container.layout().itemAt(i).widget()
+        if widget:
+            widget.setParent(None)
 
     table = QTableWidget()
     table.setRowCount(len(data))
@@ -14,6 +21,4 @@ def render_table(container, data):
         table.setItem(row, 0, QTableWidgetItem(key))
         table.setItem(row, 1, QTableWidgetItem(str(value)))
 
-    layout = QVBoxLayout()
-    layout.addWidget(table)
-    container.setLayout(layout)
+    container.layout().addWidget(table)
