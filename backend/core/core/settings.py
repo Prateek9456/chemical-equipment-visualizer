@@ -2,11 +2,25 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-dev-key"
+
+# =========================
+# SECURITY
+# =========================
+
+SECRET_KEY = "django-insecure-demo-key-change-in-prod"
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    ".onrender.com",
+]
+
+
+# =========================
+# APPLICATIONS
+# =========================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -16,11 +30,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # Third-party
     "rest_framework",
     "corsheaders",
 
+    # Local apps
     "analytics",
 ]
+
+
+# =========================
+# MIDDLEWARE
+# =========================
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -33,7 +54,17 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
+# =========================
+# CORS (Frontend Access)
+# =========================
+
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+# =========================
+# URLS & WSGI
+# =========================
 
 ROOT_URLCONF = "core.urls"
 
@@ -55,6 +86,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
+
+# =========================
+# DATABASE
+# =========================
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -62,20 +98,22 @@ DATABASES = {
     }
 }
 
+
+# =========================
+# PASSWORD VALIDATION
+# =========================
+
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+
+# =========================
+# INTERNATIONALIZATION
+# =========================
 
 LANGUAGE_CODE = "en-us"
 
@@ -84,6 +122,16 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+
+# =========================
+# STATIC FILES
+# =========================
+
+STATIC_URL = "/static/"
+
+
+# =========================
+# DEFAULT PRIMARY KEY
+# =========================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
