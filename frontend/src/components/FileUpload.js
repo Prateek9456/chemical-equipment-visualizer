@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../App.css";
 
+const API_BASE = "https://YOUR-BACKEND.onrender.com";
+
 function FileUpload({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,16 +16,16 @@ function FileUpload({ onUploadSuccess }) {
     setError("");
 
     const formData = new FormData();
-    formData.append("file", file); // lowercase key — DO NOT CHANGE
+    formData.append("file", file);
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/upload/",
+      const res = await axios.post(
+        `${API_BASE}/api/upload/`,
         formData
       );
-      onUploadSuccess(response.data);
-    } catch (err) {
-      setError("Upload failed. Please check your CSV file.");
+      onUploadSuccess(res.data);
+    } catch {
+      setError("Upload failed. Invalid CSV.");
     } finally {
       setLoading(false);
     }
@@ -31,24 +33,10 @@ function FileUpload({ onUploadSuccess }) {
 
   return (
     <section className="card upload-card">
-      <h2 className="section-title">Upload Equipment CSV</h2>
-
-      <div className="upload-controls">
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-
-        <button
-          className="primary-btn"
-          onClick={handleUpload}
-          disabled={!file || loading}
-        >
-          {loading ? "Uploading..." : "Upload CSV"}
-        </button>
-      </div>
-
+      <input type="file" onChange={e => setFile(e.target.files[0])} />
+      <button onClick={handleUpload} disabled={loading}>
+        {loading ? "Uploading..." : "Upload CSV"}
+      </button>
       {error && <p className="error-text">{error}</p>}
     </section>
   );
