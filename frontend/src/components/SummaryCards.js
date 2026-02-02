@@ -1,39 +1,35 @@
 import React from "react";
+import "../App.css";
 
 function SummaryCards({ data }) {
-  const cardStyle = {
-    padding: "15px",
-    background: "#f4f4f4",
-    borderRadius: "8px",
-    width: "200px",
-    textAlign: "center",
-  };
-
-  const containerStyle = {
-    display: "flex",
-    gap: "20px",
-    marginBottom: "30px",
-  };
-
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h3>Total Equipment</h3>
-        <p>{data.total_equipment}</p>
+    <section className="summary-grid">
+      <div className="card summary-card">
+        <p className="summary-label">Total Equipment</p>
+        <h2 className="summary-value">{data.total_equipment}</h2>
       </div>
-      <div style={cardStyle}>
-        <h3>Avg Flowrate</h3>
-        <p>{data.average_flowrate}</p>
+
+      <div className="card summary-card">
+        <p className="summary-label">Avg Flow Rate</p>
+        <h2 className="summary-value">
+          {data.average_flowrate.toFixed(2)}
+        </h2>
       </div>
-      <div style={cardStyle}>
-        <h3>Avg Pressure</h3>
-        <p>{data.average_pressure}</p>
+
+      <div className="card summary-card">
+        <p className="summary-label">Avg Pressure</p>
+        <h2 className="summary-value">
+          {data.average_pressure.toFixed(2)}
+        </h2>
       </div>
-      <div style={cardStyle}>
-        <h3>Avg Temperature</h3>
-        <p>{data.average_temperature}</p>
+
+      <div className="card summary-card">
+        <p className="summary-label">Avg Temperature</p>
+        <h2 className="summary-value">
+          {data.average_temperature.toFixed(2)}
+        </h2>
       </div>
-    </div>
+    </section>
   );
 }
 

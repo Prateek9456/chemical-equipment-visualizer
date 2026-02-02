@@ -1,38 +1,400 @@
-.App {
-  text-align: center;
+/* ================================
+   Global Base Styles
+================================ */
+
+* {
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  background-color: #f5f7fb;
+  color: #1f2937;
+  overflow-x: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
+/* ================================
+   Intro Splash Screen
+================================ */
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.intro-screen {
+  height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  color: #e5e7eb;
+  text-align: center;
 }
 
-.App-link {
-  color: #61dafb;
+.intro-screen h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-top: 28px;
+  letter-spacing: 0.5px;
 }
 
-@keyframes App-logo-spin {
+.intro-screen p {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  opacity: 0.65;
+}
+
+/* Molecule pulse animation */
+
+.molecule-animation {
+  display: flex;
+  gap: 18px;
+}
+
+.molecule-animation span {
+  width: 14px;
+  height: 14px;
+  background: #38bdf8;
+  border-radius: 50%;
+  animation: pulse 1.6s infinite ease-in-out;
+}
+
+.molecule-animation span:nth-child(2) { animation-delay: 0.2s; }
+.molecule-animation span:nth-child(3) { animation-delay: 0.4s; }
+.molecule-animation span:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.7); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.5; }
+}
+
+/* ================================
+   Animated Chemical Background
+================================ */
+
+.animated-bg {
+  position: relative;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  overflow: hidden;
+}
+
+.animated-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'>\
+<g fill='none' stroke='%2394a3b8' stroke-width='1.2' stroke-dasharray='6 10'>\
+<path d='M100 100 H300 V200 H500'/>\
+<path d='M200 400 V250 H600'/>\
+<circle cx='500' cy='200' r='28'/>\
+<rect x='580' y='170' width='40' height='60' rx='6'/>\
+<circle cx='300' cy='250' r='22'/>\
+</g></svg>");
+  background-repeat: repeat;
+  background-size: 600px 450px;
+  opacity: 0.08;
+  animation: drift 60s linear infinite;
+  pointer-events: none;
+}
+
+.animated-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(59,130,246,0.05),
+    rgba(14,165,233,0.04),
+    rgba(59,130,246,0.05)
+  );
+  background-size: 400% 400%;
+  animation: bgFlow 25s ease infinite;
+  pointer-events: none;
+}
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: 600px 450px; }
+}
+
+@keyframes bgFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ================================
+   App Layout
+================================ */
+
+.app-root {
+  padding: 32px 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ================================
+   App Title
+================================ */
+
+.app-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 36px;
+  color: #020617;
+}
+
+/* ================================
+   Shared Card Style
+================================ */
+
+.card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+/* ================================
+   Section Titles
+================================ */
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #020617;
+}
+
+/* ================================
+   File Upload Section
+================================ */
+
+.upload-card {
+  margin-bottom: 40px;
+}
+
+.upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+/* ================================
+   Buttons
+================================ */
+
+.primary-btn {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+.primary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ================================
+   Error Text
+================================ */
+
+.error-text {
+  margin-top: 14px;
+  color: #dc2626;
+  font-size: 0.9rem;
+}
+
+/* ================================
+   Summary Cards (Staggered Entry)
+================================ */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  margin-bottom: 40px;
+}
+
+.summary-card {
+  text-align: center;
+  opacity: 0;
+  animation: riseIn 0.6s ease forwards;
+}
+
+.summary-card:nth-child(1) { animation-delay: 0.1s; }
+.summary-card:nth-child(2) { animation-delay: 0.2s; }
+.summary-card:nth-child(3) { animation-delay: 0.3s; }
+.summary-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes riseIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(14px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 10px;
+}
+
+.summary-value {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #020617;
+}
+
+/* ================================
+   Chart Animation
+================================ */
+
+.chart-card {
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: chartIn 0.7s ease forwards;
+  animation-delay: 0.55s;
+}
+
+@keyframes chartIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.chart-wrapper {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* ================================
+   Data Table (Row Cascade)
+================================ */
+
+.table-card {
+  margin-bottom: 48px;
+}
+
+.data-table tbody tr {
+  opacity: 0;
+  animation: rowFade 0.4s ease forwards;
+}
+
+.data-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.data-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+.data-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+.data-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+.data-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes rowFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 14px 18px;
+}
+
+.data-table thead th {
+  background-color: #f1f5f9;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table tbody td {
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* ================================
+   Responsive Design
+================================ */
+
+@media (max-width: 900px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .app-title {
+    font-size: 1.6rem;
+  }
+
+  .upload-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primary-btn {
+    width: 100%;
+  }
+
+  .chart-wrapper {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
   }
 }
