@@ -2,10 +2,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils.timezone import now
-
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-
 import pandas as pd
 
 from analytics.models import Dataset
@@ -20,11 +18,14 @@ def upload_csv(request):
 
     df = pd.read_csv(file)
 
+    # Normalize column names (IMPORTANT for robustness)
+    df.columns = [c.strip().lower() for c in df.columns]
+
     total_equipment = len(df)
-    average_flowrate = round(df["flow_rate"].mean(), 2)
+    average_flowrate = round(df["flowrate"].mean(), 2)
     average_pressure = round(df["pressure"].mean(), 2)
     average_temperature = round(df["temperature"].mean(), 2)
-    type_distribution = df["equipment_type"].value_counts().to_dict()
+    type_distribution = df["type"].value_counts().to_dict()
 
     summary = {
         "total_equipment": total_equipment,
@@ -39,10 +40,15 @@ def upload_csv(request):
         summary=summary
     )
 
-    # Keep only last 5 uploads
+    # ✅ SAFE cleanup: keep only last 5
     excess = Dataset.objects.count() - 5
     if excess > 0:
-        Dataset.objects.all().order_by("uploaded_at")[:excess].delete()
+        ids_to_delete = (
+            Dataset.objects
+            .order_by("uploaded_at")
+            .values_list("id", flat=True)[:excess]
+        )
+        Dataset.objects.filter(id__in=list(ids_to_delete)).delete()
 
     return Response(summary)
 
@@ -67,48 +73,39 @@ def generate_report(request):
     width, height = A4
     y = height - 50
 
-    # Title
     p.setFont("Helvetica-Bold", 16)
     p.drawString(50, y, "Chemical Equipment Analytics Report")
 
-    # Timestamp
     y -= 30
     p.setFont("Helvetica", 10)
-    p.drawString(
-        50,
-        y,
-        f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
+    p.drawString(50, y, f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    # Summary metrics
     y -= 40
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Summary Metrics")
 
     y -= 20
     p.setFont("Helvetica", 10)
-    summary = latest.summary
+    s = latest.summary
 
-    p.drawString(60, y, f"Total Equipment: {summary['total_equipment']}")
+    p.drawString(60, y, f"Total Equipment: {s['total_equipment']}")
     y -= 15
-    p.drawString(60, y, f"Average Flow Rate: {summary['average_flowrate']}")
+    p.drawString(60, y, f"Average Flowrate: {s['average_flowrate']}")
     y -= 15
-    p.drawString(60, y, f"Average Pressure: {summary['average_pressure']}")
+    p.drawString(60, y, f"Average Pressure: {s['average_pressure']}")
     y -= 15
-    p.drawString(60, y, f"Average Temperature: {summary['average_temperature']}")
+    p.drawString(60, y, f"Average Temperature: {s['average_temperature']}")
 
-    # Equipment distribution
     y -= 30
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Equipment Type Distribution")
 
     y -= 20
     p.setFont("Helvetica", 10)
-    for equipment, count in summary["type_distribution"].items():
-        p.drawString(60, y, f"{equipment}: {count}")
+    for k, v in s["type_distribution"].items():
+        p.drawString(60, y, f"{k}: {v}")
         y -= 15
 
     p.showPage()
     p.save()
-
     return response
