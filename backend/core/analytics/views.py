@@ -18,91 +18,78 @@ def upload_csv(request):
 
     df = pd.read_csv(file)
 
-    # Normalize column names (IMPORTANT for robustness)
-    df.columns = [c.strip().lower() for c in df.columns]
-
-    total_equipment = len(df)
-    average_flowrate = round(df["flowrate"].mean(), 2)
-    average_pressure = round(df["pressure"].mean(), 2)
-    average_temperature = round(df["temperature"].mean(), 2)
-    type_distribution = df["type"].value_counts().to_dict()
-
-    summary = {
-        "total_equipment": total_equipment,
-        "average_flowrate": average_flowrate,
-        "average_pressure": average_pressure,
-        "average_temperature": average_temperature,
-        "type_distribution": type_distribution,
+    required_columns = {
+        "equipment_type",
+        "flow_rate",
+        "pressure",
+        "temperature",
     }
 
-    Dataset.objects.create(
-        name=file.name,
-        summary=summary
-    )
-
-    # ✅ SAFE cleanup: keep only last 5
-    excess = Dataset.objects.count() - 5
-    if excess > 0:
-        ids_to_delete = (
-            Dataset.objects
-            .order_by("uploaded_at")
-            .values_list("id", flat=True)[:excess]
+    if not required_columns.issubset(df.columns):
+        return Response(
+            {"error": "CSV does not match required format"},
+            status=400,
         )
-        Dataset.objects.filter(id__in=list(ids_to_delete)).delete()
+
+    summary = {
+        "total_equipment": len(df),
+        "average_flowrate": round(df["flow_rate"].mean(), 2),
+        "average_pressure": round(df["pressure"].mean(), 2),
+        "average_temperature": round(df["temperature"].mean(), 2),
+        "type_distribution": df["equipment_type"].value_counts().to_dict(),
+    }
+
+    Dataset.objects.create(name=file.name, summary=summary)
+
+    ids = list(
+        Dataset.objects.order_by("uploaded_at")
+        .values_list("id", flat=True)
+    )
+    if len(ids) > 5:
+        Dataset.objects.filter(id__in=ids[:-5]).delete()
 
     return Response(summary)
 
 
 @api_view(["GET"])
 def history(request):
-    datasets = Dataset.objects.all().order_by("-uploaded_at")[:5]
-    serializer = DatasetSerializer(datasets, many=True)
-    return Response(serializer.data)
+    datasets = Dataset.objects.order_by("-uploaded_at")[:5]
+    return Response(DatasetSerializer(datasets, many=True).data)
 
 
 @api_view(["GET"])
 def generate_report(request):
     latest = Dataset.objects.last()
     if not latest:
-        return Response({"error": "No dataset available"}, status=400)
+        return Response({"error": "No data available"}, status=400)
 
     response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="equipment_report.pdf"'
+    response["Content-Disposition"] = 'attachment; filename="report.pdf"'
 
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4
-    y = height - 50
 
+    y = height - 50
     p.setFont("Helvetica-Bold", 16)
     p.drawString(50, y, "Chemical Equipment Analytics Report")
 
     y -= 30
     p.setFont("Helvetica", 10)
-    p.drawString(50, y, f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-    y -= 40
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(50, y, "Summary Metrics")
-
-    y -= 20
-    p.setFont("Helvetica", 10)
-    s = latest.summary
-
-    p.drawString(60, y, f"Total Equipment: {s['total_equipment']}")
-    y -= 15
-    p.drawString(60, y, f"Average Flowrate: {s['average_flowrate']}")
-    y -= 15
-    p.drawString(60, y, f"Average Pressure: {s['average_pressure']}")
-    y -= 15
-    p.drawString(60, y, f"Average Temperature: {s['average_temperature']}")
+    p.drawString(50, y, f"Generated on: {now()}")
 
     y -= 30
+    for k, v in latest.summary.items():
+        if k != "type_distribution":
+            p.drawString(60, y, f"{k.replace('_',' ').title()}: {v}")
+            y -= 15
+
+    y -= 20
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(50, y, "Equipment Type Distribution")
+    p.drawString(50, y, "Equipment Distribution")
 
     y -= 20
     p.setFont("Helvetica", 10)
-    for k, v in s["type_distribution"].items():
+    for k, v in latest.summary["type_distribution"].items():
         p.drawString(60, y, f"{k}: {v}")
         y -= 15
 
