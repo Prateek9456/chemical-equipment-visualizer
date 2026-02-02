@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../App.css";
 
-const API_BASE_URL =
-  "https://chemical-equipment-visualizer-00mh.onrender.com";
+const API_BASE = "https://chemical-equipment-visualizer-00mh.onrender.com";
 
 function FileUpload({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
@@ -11,20 +10,17 @@ function FileUpload({ onUploadSuccess }) {
   const [error, setError] = useState("");
 
   const handleUpload = async () => {
-    if (!file) {
-      setError("Please select a CSV file first.");
-      return;
-    }
+    if (!file) return;
 
     setLoading(true);
     setError("");
 
     const formData = new FormData();
-    formData.append("file", file); // MUST be "file"
+    formData.append("file", file); // MUST be lowercase
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/upload/`,
+        `${API_BASE}/api/upload/`,
         formData,
         {
           headers: {
@@ -56,7 +52,7 @@ function FileUpload({ onUploadSuccess }) {
         <button
           className="primary-btn"
           onClick={handleUpload}
-          disabled={loading}
+          disabled={!file || loading}
         >
           {loading ? "Uploading..." : "Upload CSV"}
         </button>
