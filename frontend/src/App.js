@@ -11,7 +11,10 @@ function App() {
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Chemical Equipment Parameter Visualizer</h1>
 
-      <FileUpload onUploadSuccess={setData} />
+      <FileUpload onUploadSuccess={(responseData) => {
+        console.log("UPLOAD SUCCESS:", responseData);
+        setData(responseData);
+      }} />
 
       {data && (
         <>

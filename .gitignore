@@ -1,21 +1,13 @@
-# Python
-venv/
+# Python cache
 __pycache__/
 *.pyc
 
-# Django
-db.sqlite3
-media/
-staticfiles/
+# Virtual environments
+venv/
+.env/
 
 # Node
 node_modules/
 
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
+# Django
+db.sqlite3
