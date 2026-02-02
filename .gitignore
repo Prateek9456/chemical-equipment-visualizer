@@ -1,13 +1,34 @@
-# Python
+# ===== Python =====
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
 
-# Virtual environments
+# ===== Virtual Environments =====
 venv/
 .env/
 
-# Node
-node_modules/
+# ===== Django =====
+*.log
+local_settings.py
 
-# Django
-db.sqlite3
+# ===== Node / React =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== Build outputs =====
+build/
+dist/
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+
+# ===== IDEs =====
+.vscode/
+.idea/
+*.swp
