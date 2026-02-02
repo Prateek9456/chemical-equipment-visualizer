@@ -2,14 +2,36 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils.timezone import now
-
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-
 import pandas as pd
 
 from analytics.models import Dataset
 from analytics.serializers import DatasetSerializer
+
+
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize column names to backend-standard format.
+    Supports multiple CSV schemas.
+    """
+    df = df.rename(columns={
+        "Type": "equipment_type",
+        "Equipment Type": "equipment_type",
+        "equipment_type": "equipment_type",
+
+        "Flowrate": "flow_rate",
+        "Flow Rate": "flow_rate",
+        "flow_rate": "flow_rate",
+
+        "Pressure": "pressure",
+        "pressure": "pressure",
+
+        "Temperature": "temperature",
+        "temperature": "temperature",
+    })
+
+    return df
 
 
 @api_view(["POST"])
@@ -19,6 +41,24 @@ def upload_csv(request):
         return Response({"error": "No file provided"}, status=400)
 
     df = pd.read_csv(file)
+    df = normalize_columns(df)
+
+    required_cols = {
+        "equipment_type",
+        "flow_rate",
+        "pressure",
+        "temperature",
+    }
+
+    if not required_cols.issubset(df.columns):
+        return Response(
+            {
+                "error": "Invalid CSV format",
+                "expected_columns": list(required_cols),
+                "received_columns": list(df.columns),
+            },
+            status=400,
+        )
 
     total_equipment = len(df)
     average_flowrate = round(df["flow_rate"].mean(), 2)
@@ -36,10 +76,9 @@ def upload_csv(request):
 
     Dataset.objects.create(
         name=file.name,
-        summary=summary
+        summary=summary,
     )
 
-    # Keep only last 5 uploads
     excess = Dataset.objects.count() - 5
     if excess > 0:
         Dataset.objects.all().order_by("uploaded_at")[:excess].delete()
@@ -67,26 +106,20 @@ def generate_report(request):
     width, height = A4
     y = height - 50
 
-    # Title
     p.setFont("Helvetica-Bold", 16)
     p.drawString(50, y, "Chemical Equipment Analytics Report")
 
-    # Timestamp
     y -= 30
     p.setFont("Helvetica", 10)
-    p.drawString(
-        50,
-        y,
-        f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
+    p.drawString(50, y, f"Generated on: {now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    # Summary metrics
     y -= 40
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Summary Metrics")
 
     y -= 20
     p.setFont("Helvetica", 10)
+
     summary = latest.summary
 
     p.drawString(60, y, f"Total Equipment: {summary['total_equipment']}")
@@ -97,15 +130,14 @@ def generate_report(request):
     y -= 15
     p.drawString(60, y, f"Average Temperature: {summary['average_temperature']}")
 
-    # Equipment distribution
     y -= 30
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Equipment Type Distribution")
 
     y -= 20
     p.setFont("Helvetica", 10)
-    for equipment, count in summary["type_distribution"].items():
-        p.drawString(60, y, f"{equipment}: {count}")
+    for eq, count in summary["type_distribution"].items():
+        p.drawString(60, y, f"{eq}: {count}")
         y -= 15
 
     p.showPage()
