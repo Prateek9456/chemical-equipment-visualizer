@@ -1,127 +1,124 @@
-# Employee Attrition Prediction System
+# Chemical Equipment Visualizer
 
-An end-to-end, modular ML system to predict employee attrition, expose predictions via APIs, visualize insights through multiple UIs, and maintain audit + governance controls.
+A visualization-focused application designed to represent **chemical engineering equipment** (reactors, distillation columns, heat exchangers, etc.) in an interactive and understandable way.
 
----
-
-## 📌 Project Overview
-
-This project predicts whether an employee is likely to leave an organization using historical HR data.  
-It is built in **modular phases** so that data science, backend APIs, frontend dashboards, desktop tools, and governance can evolve independently.
-
-### Core Goals
-- Train and evaluate a robust attrition prediction model
-- Serve predictions via REST APIs
-- Provide both web and desktop interfaces
-- Ensure logging, auditability, and governance
-- Maintain clean Git workflow and modular codebase
+The project focuses on **visual clarity, modular structure, and educational usability**, rather than heavy numerical simulation.
 
 ---
 
-## 🧱 Architecture (High Level)
+## 🎯 Project Purpose
+
+The Chemical Equipment Visualizer is built to:
+- Help students and learners **visualize chemical equipment**
+- Represent **structure, components, and flow paths**
+- Provide an interactive UI instead of static textbook diagrams
+- Act as a foundation for future extensions like:
+  - Parameter inputs
+  - Animations
+  - Simulation overlays
+
+---
+
+## 🧠 What the Project Is (and Is NOT)
+
+### ✅ It IS
+- A **visualization tool**
+- UI + logic separation
+- Equipment-centric
+- Modular and extensible
+- Focused on clarity and correctness of representation
+
+### ❌ It is NOT (yet)
+- A full CFD simulator
+- A thermodynamics solver
+- A process optimization engine
+
+---
+
+## 🧱 High-Level Architecture
 
 
 ---
 
 ## ⚙️ What Has Been Implemented So Far
 
-### ✅ Module 1 – Data & Model
-- Dataset cleaning and preprocessing
-- Feature encoding and scaling
-- Model training (classification)
-- Evaluation metrics (accuracy, precision, recall)
-- Model persistence using `.pkl`
+### ✅ Core Structure
+- Clean separation of:
+  - UI
+  - Equipment logic
+  - Rendering logic
+- Base equipment class created to enforce consistency
 
-### ✅ Module 2 – Backend (FastAPI)
-- REST API for predictions
-- Input validation using Pydantic
-- Model + preprocessing loaded at startup
-- `/predict` endpoint fully functional
-- Error handling and logging
-- Deployment-ready structure
+### ✅ Visualization Layer
+- Canvas-based drawing system
+- Coordinate-based rendering
+- Equipment drawn programmatically (not static images)
 
-### ✅ Module 3 – UI (In Progress / Stable)
-- **React UI (mod2-react)**
-  - Form-based employee input
-  - API integration
-  - Prediction display
-- **PyQt Desktop UI (mod3-pyqtv)**
-  - Native desktop app
-  - API consumption
-  - Clean separation of UI and services
+### ✅ Equipment Modules
+- Individual files per equipment type
+- Shared interface for:
+  - Dimensions
+  - Input/output ports
+  - Labels
 
-### ✅ Governance & Audit
-- Logging of:
-  - Requests
-  - Predictions
-  - Timestamps
-- Basic governance rules scaffolded
-- Audit report placeholders
+### ✅ UI
+- Main window layout finalized
+- Equipment selection controls
+- Canvas refresh logic working correctly
 
 ---
 
-## 🧠 How the System Works (Flow)
+## 🔁 How the Application Works
 
-1. User enters employee details
-2. UI sends request to FastAPI backend
-3. Backend:
-   - Validates input
-   - Applies preprocessing pipeline
-   - Loads trained model
-   - Generates prediction
-4. Prediction is:
-   - Returned to UI
-   - Logged for audit
-5. Governance layer tracks usage & behavior
+1. Application starts from `run.py`
+2. Main window initializes UI components
+3. User selects equipment type
+4. Corresponding equipment class is instantiated
+5. Equipment is rendered on canvas
+6. Connections / flow paths are displayed
+7. UI updates dynamically on interaction
 
 ---
 
-## 🧪 Git & Branch Strategy
+## 🧪 Git Structure & Workflow
 
-### Branches Used
-- `main` – stable production-ready code
-- `feature/module-2-fastapi-db` – backend development
-- `feature/module-3-audit-governance` – audit & governance
-- `mod3-pyqtv` – PyQt UI work
+### Branching
+- `main` → stable, working visualizer
+- `feature/equipment-*` → individual equipment additions
+- `ui-refactor` → UI improvements
 
 ### Practices
-- Feature-based branching
-- Merges only after stability
-- Tags used for deployment milestones
-- `.gitignore` configured for:
-  - models
-  - logs
-  - environment files
+- One equipment = one module
+- No direct UI logic inside equipment classes
+- Frequent small commits
+- Clear commit messages
 
 ---
 
-## 🛠 Problems Faced & Solutions
+## 🚧 Problems Faced & How They Were Solved
 
 | Problem | Solution |
 |------|---------|
-Model reload latency | Load model once at app startup |
-CORS issues | FastAPI CORS middleware |
-Mismatch between UI & API schema | Centralized Pydantic schemas |
-Deployment issues on Render | Environment-based configs |
-Offline Render confusion | Services stopped safely; no billing |
+Messy UI logic | Strict UI–logic separation |
+Hardcoded dimensions | Centralized constants |
+Re-render flickering | Controlled canvas refresh |
+Scaling issues | Relative coordinate system |
 
 ---
 
-## 🚧 What Is Left To Do
+## 🔜 What Needs to Be Done Next
 
-### 🔜 Immediate Next Steps
-- UI/UX polishing (React & PyQt)
-- Better error messages
-- Audit report generation
-- Governance rules enforcement
-- Role-based access (optional)
+### Immediate
+- UI/UX polishing
+- Better labeling & legends
+- Equipment interconnection visualization
+- Flow animation (basic)
 
-### 🔮 Future Enhancements
-- Model retraining pipeline
-- Database integration
-- User authentication
-- Admin dashboard
-- Model explainability (SHAP)
+### Future Enhancements
+- Parameter sliders (temp, pressure, flow rate)
+- Step-by-step operation mode
+- Export diagrams
+- Simulation overlay (optional)
 
 ---
 
@@ -129,4 +126,4 @@ Offline Render confusion | Services stopped safely; no billing |
 
 ```bash
 pip install -r requirements.txt
-uvicorn src.api.main:app --reload
+python run.py
