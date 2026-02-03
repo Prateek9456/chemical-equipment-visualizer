@@ -230,7 +230,7 @@ body {
 }
 
 /* ================================
-   Summary Cards (Staggered Entry)
+   Summary Cards
 ================================ */
 
 .summary-grid {
@@ -262,18 +262,6 @@ body {
   }
 }
 
-.summary-label {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-bottom: 10px;
-}
-
-.summary-value {
-  font-size: 2.1rem;
-  font-weight: 700;
-  color: #020617;
-}
-
 /* ================================
    Chart Animation
 ================================ */
@@ -296,40 +284,9 @@ body {
   }
 }
 
-.chart-wrapper {
-  max-width: 420px;
-  margin: 0 auto;
-}
-
 /* ================================
-   Data Table (Row Cascade)
+   Data Table
 ================================ */
-
-.table-card {
-  margin-bottom: 48px;
-}
-
-.data-table tbody tr {
-  opacity: 0;
-  animation: rowFade 0.4s ease forwards;
-}
-
-.data-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
-.data-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
-.data-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
-.data-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
-.data-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
-
-@keyframes rowFade {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .table-wrapper {
   overflow-x: auto;
@@ -351,17 +308,27 @@ body {
   background-color: #f1f5f9;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #334155;
-  border-bottom: 1px solid #e5e7eb;
 }
 
 .data-table tbody td {
-  font-size: 0.95rem;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.data-table tbody tr:nth-child(even) {
-  background-color: #fafafa;
+/* ================================
+   Creator Credit
+================================ */
+
+.creator-credit {
+  position: fixed;
+  bottom: 14px;
+  left: 18px;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #475569;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 10;
+  font-family: "Segoe Script", "Brush Script MT", cursive;
 }
 
 /* ================================
@@ -386,10 +353,6 @@ body {
 
   .primary-btn {
     width: 100%;
-  }
-
-  .chart-wrapper {
-    max-width: 100%;
   }
 }
 
