@@ -2,7 +2,16 @@ import React from "react";
 import "../App.css";
 
 function DataTable({ data }) {
+  // ✅ HARD SAFETY GUARD
+  if (!data || !data.type_distribution) {
+    return null;
+  }
+
   const entries = Object.entries(data.type_distribution);
+
+  if (entries.length === 0) {
+    return null;
+  }
 
   return (
     <section className="card table-card">

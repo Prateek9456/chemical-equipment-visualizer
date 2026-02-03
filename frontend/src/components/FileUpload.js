@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../App.css";
 
+/**
+ * 🔴 IMPORTANT
+ * Replace this with your ACTUAL Render backend URL
+ */
 const API_BASE = "https://chemical-equipment-visualizer-00mh.onrender.com";
 
 function FileUpload({ onUploadSuccess }) {
@@ -16,25 +20,28 @@ function FileUpload({ onUploadSuccess }) {
     setError("");
 
     const formData = new FormData();
-    formData.append("file", file); // MUST be lowercase
+    formData.append("file", file); // lowercase key (LOCKED)
 
     try {
       const response = await axios.post(
         `${API_BASE}/api/upload/`,
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          timeout: 60000, // ⏱ handles Render cold start
         }
       );
 
       onUploadSuccess(response.data);
     } catch (err) {
       console.error(err);
-      setError("Upload failed. Please check your CSV format.");
+
+      if (err.code === "ECONNABORTED") {
+        setError("Server is waking up. Please try again in 10–20 seconds.");
+      } else {
+        setError("Upload failed. Please check your CSV format.");
+      }
     } finally {
-      setLoading(false);
+      setLoading(false); // 🔑 NEVER leave UI stuck
     }
   };
 
